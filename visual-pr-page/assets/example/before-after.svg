@@ -1,0 +1,18 @@
+<svg viewBox="0 0 860 200" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Where the retry limit lives, before and after">
+  <text class="title" x="20" y="24">Before</text>
+  <rect class="box" x="20" y="40" width="180" height="50" rx="8"/>
+  <text x="110" y="70" text-anchor="middle">upload.js</text>
+  <rect class="box muted" x="230" y="40" width="180" height="50" rx="8"/>
+  <text class="muted" x="320" y="70" text-anchor="middle">retries forever</text>
+  <path class="line dash" d="M200 65 H228"/>
+  <text class="title" x="450" y="24">After</text>
+  <rect class="box" x="450" y="40" width="180" height="50" rx="8"/>
+  <text x="540" y="70" text-anchor="middle">upload.js</text>
+  <rect class="box hl" x="660" y="40" width="180" height="50" rx="8"/>
+  <text x="750" y="64" text-anchor="middle">retryPolicy.js</text>
+  <text class="muted" x="750" y="81" text-anchor="middle">new, 3 tries, then stop</text>
+  <path class="line" d="M630 65 H658"/>
+  <rect class="box" x="660" y="130" width="180" height="50" rx="8"/>
+  <text x="750" y="160" text-anchor="middle">retryPolicy.test.js</text>
+  <path class="line" d="M750 130 V92"/>
+</svg>

@@ -1,0 +1,125 @@
+{
+  "id": "example-retry-limit",
+  "title": "Stop uploads from retrying forever",
+  "why": "A failed upload now retries at most three times and then tells the user, so a broken file no longer keeps the queue busy all night.",
+  "crumbs": ["Example project", "[Issue #42](https://example.com/issues/42)", "branch `42-retry-limit`"],
+  "chips": ["**3** commits, not pushed", "**128** tests passing", "No new libraries", "Users see a new error message"],
+  "sections": [
+    {
+      "id": "notes",
+      "title": "Things to note",
+      "blocks": [
+        {
+          "type": "notes",
+          "items": [
+            { "lead": "Users will see something new.", "text": "After the third failed try, the upload shows an error with a Retry button." },
+            { "lead": "The limit is fixed at three.", "text": "The issue asked for a setting. That moved to a later issue, listed under Changes from the plan." }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "words",
+      "title": "Words used here",
+      "blocks": [
+        {
+          "type": "glossary",
+          "items": [
+            { "term": "Try", "meaning": "One attempt to send the file." },
+            { "term": "Retry policy", "meaning": "The rule for how often to try again, and how long to wait in between." }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "how",
+      "title": "How an upload is retried",
+      "lead": "Click Next to walk through one upload. Switch to the failing case to see where it stops.",
+      "blocks": [
+        { "type": "diagram", "svg": "flow.svg", "caption": "The new check sits after each try. Dashed arrows go back for another try." },
+        {
+          "type": "steps",
+          "modes": [
+            { "id": "ok", "label": "The upload works", "tone": "good", "outcome": "The file is marked as done after one try." },
+            { "id": "broken", "label": "The file is broken", "tone": "bad", "outcome": "After three tries the user sees an error, and the queue moves on." }
+          ],
+          "steps": [
+            { "title": "The upload starts", "detail": "The queue picks the next file." },
+            { "title": "The file is sent", "detail": "This step is unchanged." },
+            { "title": "It is marked as done", "detail": "Nothing else happens.", "skipIn": ["broken"] },
+            { "title": "It waits and tries again", "detail": "It waits 2, then 4, then 8 seconds.", "skipIn": ["ok"] },
+            { "title": "It gives up after the third try", "detail": "The error names the file and offers a Retry button.", "skipIn": ["ok"] }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "where",
+      "title": "Where the code lives",
+      "blocks": [
+        { "type": "diagram", "svg": "before-after.svg", "caption": "The retry rule moves out of `upload.js` into its own file with its own tests." },
+        {
+          "type": "cards",
+          "items": [
+            { "tag": "New", "title": "retryPolicy.js", "body": ["Holds the limit and the waiting times.", "Nothing else imports it yet."] },
+            { "tag": "Changed", "title": "upload.js", "body": ["Asks the retry policy before each new try."] }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "commits",
+      "title": "The commits",
+      "blocks": [ { "type": "commits", "items": [
+        { "sha": "a1b2c3d", "subject": "Add a retry policy", "body": ["Three tries, waiting longer each time."], "files": [ { "path": "src/retryPolicy.js", "added": 40, "removed": 0 } ] },
+        { "sha": "d4e5f6a", "subject": "Use the retry policy in uploads", "body": [], "files": [ { "path": "src/upload.js", "added": 12, "removed": 9 } ] }
+      ] } ]
+    },
+    {
+      "id": "plan",
+      "title": "Changes from the plan",
+      "blocks": [
+        {
+          "type": "changes",
+          "items": [
+            { "title": "The limit is not a setting yet", "planned": "Admins choose the retry limit.", "built": "The limit is fixed at three.", "why": "No screen exists for the setting yet. Issue #57 adds it." }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "tests",
+      "title": "Tests",
+      "blocks": [
+        {
+          "type": "stats",
+          "items": [
+            { "value": "128", "label": "tests passing", "tone": "good" },
+            { "value": "6", "label": "new tests" },
+            { "value": "1", "label": "slow test, passes alone", "tone": "warn" }
+          ]
+        },
+        {
+          "type": "table",
+          "columns": ["Test", "What it proves"],
+          "rows": [
+            ["gives up after three tries", "The fourth try never starts"],
+            ["waits longer each time", "The waits are 2, 4 and 8 seconds"]
+          ]
+        }
+      ]
+    },
+    {
+      "id": "review",
+      "title": "Review checklist",
+      "blocks": [
+        { "type": "checklist", "items": ["Read `retryPolicy.js`.", "Try a broken file and check the error message.", "Check nothing else imports the old retry loop."] }
+      ]
+    },
+    {
+      "id": "next",
+      "title": "What comes next",
+      "blocks": [ { "type": "list", "items": ["Issue #57 makes the limit a setting."] } ]
+    }
+  ]
+}

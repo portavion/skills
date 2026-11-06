@@ -1,0 +1,415 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{{TITLE}}</title>
+<style>
+  :root {
+    --bg: #f4f2f0; --panel: #ffffff; --raised: #f0ece8; --line: #dcd6d0;
+    --text: #1f1f1f; --muted: #5f5f5f; --brand: #2f6fd6; --accent: #2f6fd6;
+    --good: #3d7a12; --bad: #c0352b; --warn: #9a6a00; --link: #1f5fbf; --code: #f7f5f3;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #1e1f22; --panel: #2a2b2f; --raised: #34363b; --line: #45474d;
+      --text: #f0f0f0; --muted: #a8a9ad; --brand: #6ea0ff; --accent: #6ea0ff;
+      --good: #8fc31f; --bad: #ff6b5c; --warn: #f0b429; --link: #7fb2ff; --code: #18191b;
+    }
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--text);
+    font: 15px/1.55 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
+  a { color: var(--link); }
+  code { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 0.88em;
+    background: var(--code); border: 1px solid var(--line); border-radius: 4px; padding: 1px 5px; overflow-wrap: anywhere; }
+
+  header.top { padding: 28px 24px 20px; border-bottom: 3px solid var(--brand); background: var(--panel); }
+  .crumbs { color: var(--muted); font-size: 13px; }
+  header.top h1 { margin: 6px 0 8px; font-size: 26px; line-height: 1.25; }
+  .why { max-width: 860px; margin: 0; font-size: 16px; }
+  .chips { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 14px; }
+  .chip { border: 1px solid var(--line); border-radius: 999px; padding: 3px 11px; font-size: 13px;
+    color: var(--muted); background: var(--raised); }
+  .chip b { color: var(--text); }
+
+  .layout { display: grid; grid-template-columns: 220px minmax(0, 1fr); max-width: 1180px; margin: 0 auto; }
+  nav.side { position: sticky; top: 0; align-self: start; padding: 20px 12px; max-height: 100vh; overflow-y: auto;
+    border-right: 1px solid var(--line); }
+  nav.side a { display: block; padding: 7px 10px; border-radius: 6px; color: var(--muted); text-decoration: none; font-size: 14px; }
+  nav.side a:hover, nav.side a.on { background: var(--raised); color: var(--text); }
+  nav.side a.on { box-shadow: inset 3px 0 0 var(--brand); }
+  main { padding: 8px 28px 80px; min-width: 0; }
+  section { padding-top: 26px; scroll-margin-top: 10px; }
+  h2 { font-size: 20px; margin: 0 0 6px; }
+  h3 { font-size: 16px; margin: 18px 0 6px; }
+  .lead { color: var(--muted); margin: 0 0 14px; max-width: 760px; }
+  .card { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 16px 18px; margin: 12px 0; }
+  .card > p:first-child { margin-top: 0; } .card > p:last-child { margin-bottom: 0; }
+  ul.bullets { margin: 0; padding-left: 20px; } ul.bullets li { margin: 6px 0; }
+
+  .glossary { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 10px; }
+  .glossary div { background: var(--panel); border: 1px solid var(--line); border-radius: 8px; padding: 10px 12px; }
+  .glossary b { display: block; margin-bottom: 2px; }
+  .glossary span { color: var(--muted); font-size: 14px; }
+
+  figure.diagram { margin: 12px 0; background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 16px; }
+  figure.diagram svg { display: block; width: 100%; height: auto; max-width: 860px; margin: 0 auto;
+    font: 13px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+  figure.diagram figcaption { color: var(--muted); font-size: 14px; margin-top: 10px; }
+  /* Diagram classes. Diagrams use these instead of colours, so they follow light and dark mode. */
+  svg .box { fill: var(--raised); stroke: var(--line); stroke-width: 1.5; }
+  svg .box.hl { fill: var(--panel); stroke: var(--brand); stroke-width: 2; }
+  svg .box.good { stroke: var(--good); stroke-width: 2; }
+  svg .box.bad { stroke: var(--bad); stroke-width: 2; }
+  svg .box.muted { fill: none; stroke-dasharray: 5 4; }
+  svg .line { stroke: var(--muted); stroke-width: 1.6; fill: none; marker-end: url(#vpp-arrow); }
+  svg .line.good { stroke: var(--good); } svg .line.bad { stroke: var(--bad); }
+  svg .line.dash { stroke-dasharray: 5 4; }
+  svg text { fill: var(--text); } svg text.muted { fill: var(--muted); font-size: 12px; }
+  svg text.title { font-weight: 600; } svg text.good { fill: var(--good); } svg text.bad { fill: var(--bad); }
+
+  .switch { display: inline-flex; border: 1px solid var(--line); border-radius: 8px; overflow: hidden; margin-bottom: 10px; }
+  .switch button { background: transparent; color: var(--muted); border: 0; padding: 7px 14px; cursor: pointer; font: inherit; }
+  .switch button.on { background: var(--brand); color: var(--bg); }
+  .switch button.on.good { background: var(--good); } .switch button.on.bad { background: var(--bad); }
+  ol.steps { list-style: none; padding: 0; margin: 0; }
+  ol.steps li { display: grid; grid-template-columns: 30px 1fr; gap: 10px; padding: 9px 10px; border-radius: 8px;
+    cursor: pointer; color: var(--muted); border: 1px solid transparent; }
+  ol.steps .n { width: 26px; height: 26px; border-radius: 50%; display: grid; place-items: center;
+    background: var(--raised); font-size: 13px; font-weight: 600; }
+  ol.steps li.done { color: var(--text); } ol.steps li.done .n { background: var(--accent); color: var(--bg); }
+  ol.steps li.now { border-color: var(--accent); background: var(--raised); color: var(--text); }
+  ol.steps li.skip { opacity: 0.45; text-decoration: line-through; }
+  .controls { display: flex; gap: 8px; margin-top: 12px; flex-wrap: wrap; }
+  .btn { background: var(--raised); color: var(--text); border: 1px solid var(--line); border-radius: 7px;
+    padding: 7px 14px; cursor: pointer; font: inherit; }
+  .btn:hover { border-color: var(--accent); }
+  .btn.primary { background: var(--brand); border-color: var(--brand); color: var(--bg); font-weight: 600; }
+  .panel-note { margin-top: 12px; padding: 10px 12px; border-radius: 8px; background: var(--raised); font-size: 14px; }
+  .panel-note.good { box-shadow: inset 3px 0 0 var(--good); } .panel-note.bad { box-shadow: inset 3px 0 0 var(--bad); }
+
+  .cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 10px; }
+  .cards button { text-align: left; background: var(--panel); border: 1px solid var(--line); border-radius: 10px;
+    padding: 12px 14px; cursor: pointer; color: var(--text); font: inherit; }
+  .cards button:hover { border-color: var(--accent); }
+  .cards button.on { border-color: var(--brand); box-shadow: 0 0 0 1px var(--brand); }
+  .cards .tag { color: var(--brand); font-weight: 700; font-size: 13px; }
+  .cards .t { display: block; margin-top: 3px; font-weight: 600; }
+
+  .tools { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; margin: 10px 0; }
+  input[type=search] { background: var(--panel); color: var(--text); border: 1px solid var(--line); border-radius: 7px;
+    padding: 7px 10px; font: inherit; min-width: 0; flex: 1; }
+  .count { color: var(--muted); font-size: 13px; }
+  .table-wrap { overflow-x: auto; border: 1px solid var(--line); border-radius: 10px; }
+  table { border-collapse: collapse; width: 100%; font-size: 14px; }
+  th, td { text-align: left; padding: 8px 12px; border-bottom: 1px solid var(--line); vertical-align: top; }
+  th { background: var(--raised); font-weight: 600; }
+  tr:last-child td { border-bottom: 0; }
+
+  details { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; margin: 8px 0; }
+  summary { cursor: pointer; padding: 12px 16px; list-style: none; display: flex; gap: 12px; align-items: baseline; flex-wrap: wrap; }
+  summary::-webkit-details-marker { display: none; }
+  summary::before { content: "+"; color: var(--accent); font-weight: 700; width: 12px; }
+  details[open] summary::before { content: "-"; }
+  details .body { padding: 0 16px 14px 40px; }
+  .sha { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; color: var(--muted); font-size: 13px; }
+  .plus { color: var(--good); } .minus { color: var(--bad); }
+  .pill { font-size: 12px; color: var(--muted); border: 1px solid var(--line); border-radius: 999px; padding: 0 8px; margin-left: auto; white-space: nowrap; }
+  ul.files { list-style: none; padding: 0; margin: 8px 0 0; font-size: 13px; }
+  ul.files li { display: flex; justify-content: space-between; gap: 10px; padding: 2px 0; border-bottom: 1px dashed var(--line); }
+  ul.files li span:first-child { overflow-wrap: anywhere; }
+  dl.change { display: grid; grid-template-columns: 90px 1fr; gap: 6px 12px; margin: 0; }
+  dl.change dt { color: var(--muted); font-size: 13px; padding-top: 2px; } dl.change dd { margin: 0; }
+
+  .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 10px; }
+  .stat { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 12px 14px; }
+  .stat .v { font-size: 24px; font-weight: 700; } .stat .k { color: var(--muted); font-size: 13px; }
+  .stat.warn .v { color: var(--warn); } .stat.bad .v { color: var(--bad); } .stat.good .v { color: var(--good); }
+
+  .check { display: flex; gap: 10px; align-items: flex-start; padding: 8px 4px; border-bottom: 1px solid var(--line); }
+  .check:last-child { border-bottom: 0; }
+  .check input { margin-top: 4px; accent-color: var(--brand); width: 16px; height: 16px; }
+  .check.done label { color: var(--muted); text-decoration: line-through; }
+  .bar { height: 8px; background: var(--raised); border-radius: 99px; overflow: hidden; margin: 8px 0 4px; }
+  .bar div { height: 100%; background: var(--brand); width: 0; transition: width 0.2s; }
+
+  @media (max-width: 860px) {
+    .layout { grid-template-columns: 1fr; }
+    nav.side { z-index: 5; max-height: none; display: flex; overflow-x: auto; gap: 4px; padding: 8px 16px;
+      border-right: 0; border-bottom: 1px solid var(--line); background: var(--bg); }
+    nav.side a { white-space: nowrap; }
+    main { padding: 4px 16px 60px; }
+    header.top { padding: 20px 16px 16px; }
+    details .body { padding-left: 16px; }
+    dl.change { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <marker id="vpp-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="context-stroke"></path>
+    </marker>
+  </defs>
+</svg>
+<header class="top" id="top"></header>
+<div class="layout">
+  <nav class="side" id="nav"></nav>
+  <main id="main"></main>
+</div>
+<script type="application/json" id="page">{{PAGE_JSON}}</script>
+<script>
+(function () {
+  var page = JSON.parse(document.getElementById('page').textContent);
+
+  function esc(s) {
+    return String(s == null ? '' : s).replace(/[&<>"]/g, function (c) {
+      return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c];
+    });
+  }
+  // Plain text with `code`, **bold** and [label](url).
+  function fmt(s) {
+    return esc(s)
+      .replace(/`([^`]+)`/g, '<code>$1</code>')
+      .replace(/\*\*([^*]+)\*\*/g, '<b>$1</b>')
+      .replace(/\[([^\]]+)\]\(([^)\s]+)\)/g, '<a href="$2">$1</a>');
+  }
+  function el(tag, cls, html) {
+    var node = document.createElement(tag);
+    if (cls) node.className = cls;
+    if (html != null) node.innerHTML = html;
+    return node;
+  }
+  function paras(list) {
+    return (list || []).map(function (p) { return '<p>' + fmt(p) + '</p>'; }).join('');
+  }
+  function store(key, value) {
+    try {
+      if (value === undefined) return JSON.parse(localStorage.getItem(key) || 'null');
+      localStorage.setItem(key, JSON.stringify(value));
+    } catch (e) { return null; }
+  }
+
+  var BLOCKS = {
+    text: function (b) { return el('div', 'card', paras(b.paragraphs)); },
+
+    notes: function (b) {
+      return el('div', 'card', '<ul class="bullets">' + b.items.map(function (i) {
+        return '<li>' + (i.lead ? '<b>' + fmt(i.lead) + '</b> ' : '') + fmt(i.text) + '</li>';
+      }).join('') + '</ul>');
+    },
+
+    list: function (b) {
+      return el('div', 'card', '<ul class="bullets">' + b.items.map(function (i) {
+        return '<li>' + fmt(i) + '</li>';
+      }).join('') + '</ul>');
+    },
+
+    glossary: function (b) {
+      return el('div', 'glossary', b.items.map(function (i) {
+        return '<div><b>' + fmt(i.term) + '</b><span>' + fmt(i.meaning) + '</span></div>';
+      }).join(''));
+    },
+
+    diagram: function (b) {
+      return el('figure', 'diagram', b.svg + (b.caption ? '<figcaption>' + fmt(b.caption) + '</figcaption>' : ''));
+    },
+
+    stats: function (b) {
+      return el('div', 'stats', b.items.map(function (i) {
+        return '<div class="stat ' + esc(i.tone || '') + '"><div class="v">' + fmt(i.value) +
+          '</div><div class="k">' + fmt(i.label) + '</div></div>';
+      }).join(''));
+    },
+
+    // A walk-through: click Next to move through the steps. Optional modes, such as
+    // "check passes" and "check fails", cross out the steps a mode skips.
+    steps: function (b) {
+      var root = el('div', 'card');
+      var modes = b.modes || [];
+      var mode = modes.length ? modes[0].id : null;
+      var at = 0;
+      if (modes.length) {
+        var sw = el('div', 'switch');
+        modes.forEach(function (m) {
+          var btn = el('button', m.tone || '', fmt(m.label));
+          btn.type = 'button';
+          btn.onclick = function () { mode = m.id; at = 0; draw(); };
+          m.button = btn;
+          sw.appendChild(btn);
+        });
+        root.appendChild(sw);
+      }
+      var list = el('ol', 'steps');
+      var note = el('div', 'panel-note');
+      var controls = el('div', 'controls');
+      [['Back', -1, ''], ['Next', 1, 'primary'], ['Start again', 0, '']].forEach(function (c) {
+        var btn = el('button', 'btn ' + c[2], c[0]);
+        btn.type = 'button';
+        btn.onclick = function () { at = c[1] === 0 ? 0 : Math.max(0, Math.min(live().length - 1, at + c[1])); draw(); };
+        controls.appendChild(btn);
+      });
+      root.appendChild(list); root.appendChild(controls); root.appendChild(note);
+      function skipped(s) { return mode && (s.skipIn || []).indexOf(mode) >= 0; }
+      function live() { return b.steps.filter(function (s) { return !skipped(s); }); }
+      function draw() {
+        modes.forEach(function (m) { m.button.classList.toggle('on', m.id === mode); });
+        var current = live()[at];
+        list.innerHTML = '';
+        b.steps.forEach(function (s, i) {
+          var li = el('li', '', '<span class="n">' + (i + 1) + '</span><span>' + fmt(s.title) + '</span>');
+          var pos = live().indexOf(s);
+          if (skipped(s)) li.classList.add('skip');
+          else if (pos < at) li.classList.add('done');
+          else if (pos === at) li.classList.add('now');
+          if (!skipped(s)) li.onclick = function () { at = pos; draw(); };
+          list.appendChild(li);
+        });
+        var last = at === live().length - 1;
+        var m = modes.filter(function (x) { return x.id === mode; })[0];
+        note.className = 'panel-note' + (last && m && m.tone ? ' ' + m.tone : '');
+        note.innerHTML = fmt(current.detail || '') + (last && m && m.outcome ? '<p><b>' + fmt(m.outcome) + '</b></p>' : '');
+      }
+      draw();
+      return root;
+    },
+
+    // Click a card to read more about it underneath.
+    cards: function (b) {
+      var root = el('div');
+      var grid = el('div', 'cards');
+      var detail = el('div', 'card');
+      b.items.forEach(function (c, i) {
+        var btn = el('button', '', (c.tag ? '<span class="tag">' + fmt(c.tag) + '</span>' : '') +
+          '<span class="t">' + fmt(c.title) + '</span>');
+        btn.type = 'button';
+        btn.onclick = function () { show(i); };
+        c.button = btn;
+        grid.appendChild(btn);
+      });
+      function show(i) {
+        b.items.forEach(function (c, j) { c.button.classList.toggle('on', i === j); });
+        var c = b.items[i];
+        detail.innerHTML = '<h3 style="margin-top:0">' + fmt(c.title) + '</h3>' + paras(c.body);
+      }
+      root.appendChild(grid); root.appendChild(detail);
+      show(0);
+      return root;
+    },
+
+    table: function (b) {
+      var root = el('div');
+      var tools = el('div', 'tools');
+      var search = el('input'); search.type = 'search'; search.placeholder = b.searchLabel || 'Filter rows';
+      var count = el('span', 'count');
+      if (b.search !== false) { tools.appendChild(search); tools.appendChild(count); root.appendChild(tools); }
+      var wrap = el('div', 'table-wrap');
+      var table = el('table', '', '<thead><tr>' + b.columns.map(function (c) { return '<th>' + fmt(c) + '</th>'; }).join('') +
+        '</tr></thead>');
+      var body = el('tbody');
+      table.appendChild(body); wrap.appendChild(table); root.appendChild(wrap);
+      function draw() {
+        var q = search.value.toLowerCase();
+        var rows = b.rows.filter(function (r) { return !q || r.join(' ').toLowerCase().indexOf(q) >= 0; });
+        body.innerHTML = rows.map(function (r) {
+          return '<tr>' + r.map(function (c) { return '<td>' + fmt(c) + '</td>'; }).join('') + '</tr>';
+        }).join('');
+        count.textContent = rows.length + ' of ' + b.rows.length;
+      }
+      search.oninput = draw;
+      draw();
+      return root;
+    },
+
+    commits: function (b) {
+      var root = el('div');
+      b.items.forEach(function (c) {
+        var added = 0, removed = 0;
+        c.files.forEach(function (f) { added += f.added; removed += f.removed; });
+        var d = el('details');
+        d.innerHTML = '<summary><span class="sha">' + esc(c.sha) + '</span><b>' + fmt(c.subject) + '</b><span class="pill">' +
+          c.files.length + ' files <span class="plus">+' + added + '</span> <span class="minus">-' + removed + '</span></span></summary>' +
+          '<div class="body">' + paras(c.body) + '<ul class="files">' + c.files.map(function (f) {
+            return '<li><span>' + esc(f.path) + '</span><span><span class="plus">+' + f.added + '</span> <span class="minus">-' +
+              f.removed + '</span></span></li>';
+          }).join('') + '</ul></div>';
+        root.appendChild(d);
+      });
+      return root;
+    },
+
+    // Where the work differs from the plan or the issue, with the reason.
+    changes: function (b) {
+      var root = el('div');
+      b.items.forEach(function (c) {
+        var d = el('details');
+        d.innerHTML = '<summary><b>' + fmt(c.title) + '</b></summary><div class="body"><dl class="change">' +
+          (c.planned ? '<dt>Planned</dt><dd>' + fmt(c.planned) + '</dd>' : '') +
+          '<dt>Built</dt><dd>' + fmt(c.built) + '</dd><dt>Why</dt><dd>' + fmt(c.why) + '</dd></dl></div>';
+        root.appendChild(d);
+      });
+      return root;
+    },
+
+    checklist: function (b) {
+      var key = 'visual-pr-page:' + page.id;
+      var done = store(key) || {};
+      var root = el('div', 'card');
+      var bar = el('div', 'bar', '<div></div>');
+      var label = el('div', 'count');
+      root.appendChild(bar); root.appendChild(label);
+      b.items.forEach(function (text, i) {
+        var row = el('div', 'check');
+        var box = el('input'); box.type = 'checkbox'; box.id = key + i; box.checked = !!done[i];
+        var lab = el('label', '', fmt(text)); lab.htmlFor = box.id;
+        box.onchange = function () { done[i] = box.checked; store(key, done); draw(); };
+        row.appendChild(box); row.appendChild(lab); root.appendChild(row);
+      });
+      function draw() {
+        var n = b.items.filter(function (_, i) { return done[i]; }).length;
+        bar.firstChild.style.width = (100 * n / b.items.length) + '%';
+        label.textContent = n + ' of ' + b.items.length + ' checked';
+        Array.prototype.forEach.call(root.querySelectorAll('.check'), function (row, i) { row.classList.toggle('done', !!done[i]); });
+      }
+      draw();
+      return root;
+    }
+  };
+
+  if (page.accent) document.documentElement.style.setProperty('--brand', page.accent);
+  var top = document.getElementById('top');
+  top.innerHTML = '<div class="crumbs">' + (page.crumbs || []).map(fmt).join(' · ') + '</div>' +
+    '<h1>' + fmt(page.title) + '</h1><p class="why">' + fmt(page.why) + '</p>' +
+    '<div class="chips">' + (page.chips || []).map(function (c) { return '<span class="chip">' + fmt(c) + '</span>'; }).join('') + '</div>';
+
+  var nav = document.getElementById('nav');
+  var main = document.getElementById('main');
+  page.sections.forEach(function (s) {
+    var link = el('a', '', fmt(s.title)); link.href = '#' + s.id;
+    nav.appendChild(link);
+    var sec = el('section'); sec.id = s.id;
+    sec.appendChild(el('h2', '', fmt(s.title)));
+    if (s.lead) sec.appendChild(el('p', 'lead', fmt(s.lead)));
+    s.blocks.forEach(function (b) {
+      if (b.heading) sec.appendChild(el('h3', '', fmt(b.heading)));
+      sec.appendChild(BLOCKS[b.type](b));
+    });
+    main.appendChild(sec);
+  });
+
+  if ('IntersectionObserver' in window) {
+    var links = nav.querySelectorAll('a');
+    var seen = new IntersectionObserver(function (entries) {
+      entries.forEach(function (e) {
+        if (!e.isIntersecting) return;
+        Array.prototype.forEach.call(links, function (a) { a.classList.toggle('on', a.getAttribute('href') === '#' + e.target.id); });
+      });
+    }, { rootMargin: '0px 0px -70% 0px' });
+    Array.prototype.forEach.call(main.querySelectorAll('section'), function (s) { seen.observe(s); });
+  }
+})();
+</script>
+</body>
+</html>
