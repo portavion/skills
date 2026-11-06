@@ -90,12 +90,12 @@ Rebuild after new commits, or when the PR text or the plan changes.
 
 ## 7. Share it
 
-When the user wants to open it from another device, serve that one file, over Tailscale when it's available:
+When the user wants to open it from another device, serve that one file on `127.0.0.1` and put Tailscale's HTTPS in front of it:
 
 ```sh
 dir=$(mktemp -d) && ln -s "<page>.html" "$dir/index.html"
-host=$(tailscale ip -4 2>/dev/null | head -1); host=${host:-127.0.0.1}
-python3 -m http.server 8765 --bind "$host" --directory "$dir"
+python3 -m http.server 8765 --bind 127.0.0.1 --directory "$dir"   # run in the background
+tailscale serve --bg --https=8765 http://127.0.0.1:8765
 ```
 
-Run it in the background and give the user the URL. Never bind to `0.0.0.0`, and never serve a folder with other files in it.
+The URL is `https://<machine>.<tailnet>.ts.net:8765/`, which `tailscale serve status` prints. Plain `http://` on a `ts.net` name fails, because browsers force HTTPS for it. Without Tailscale, `http://127.0.0.1:8765/` works on that machine only. Never bind to `0.0.0.0`, and never serve a folder with other files in it. When the user is done, run `tailscale serve --https=8765 off` and stop the server.
